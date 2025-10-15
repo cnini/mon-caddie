@@ -1,12 +1,14 @@
 import { supabase } from "../supabaseClient";
-import type { Session, User } from "@supabase/supabase-js";
+import type { Session, User, WeakPassword } from "@supabase/supabase-js";
 
 type AuthData = {
-    session: Session | null,
-    user: User | null
+    session: Session | null;
+    user: User | null;
+    weakPassword?: WeakPassword | null;
 } | {
-    session: null,
-    user: null
+    session: null;
+    user: null;
+    weakPassword?: null;
 };
 
 /**
@@ -16,21 +18,50 @@ type AuthData = {
  * @returns The created user and session data.
  */
 export const signUp = async (
-    userFisrtname: string, 
-    userEmail: string, 
-    userPassword: string
+    firstname: string, 
+    email: string, 
+    password: string
 ): Promise<AuthData> => {
     const { data, error } = await supabase.auth.signUp({
-        email: userEmail,
-        password: userPassword,
+        email: email,
+        password: password,
         options: {
-            data: { first_name: userFisrtname }
+            data: { first_name: firstname }
         }
     });
 
-    if (error) {
-        throw new Error(error?.message);
-    }
+    if (error) throw new Error(error.message);
 
     return data;
+}
+
+/**
+ * Signs in an existing user with an email and a password.
+ * 
+ * @throws {Error} If the account doesn't exist or the email and password combination is wrong.
+ * @returns The matching user and session data.
+ */
+export const signIn = async (
+    email: string,
+    password: string
+): Promise<AuthData> => {  
+    const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password
+    });
+
+    if (error) throw new Error(error.message);
+
+    return data;
+}
+
+/**
+ * Signs out the current user.
+ * 
+ * @throws {Error} 
+ */
+export const signOut = async (): Promise<void> => {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) throw new Error(error.message);
 }

@@ -1,7 +1,10 @@
 import { useState, type FormEvent } from "react";
-import { signUp } from "../../../services/auth.service";
+import { signIn, signOut, signUp } from "../../../services/auth.service";
+import { useAuth } from "../../../context/useAuth";
 
 export default function LoginForm() {
+    const { user } = useAuth(); // Current logged user
+
     const [isRegistered, setIsRegistered] = useState<boolean>(false);
     const [firstname, setFirstname] = useState<string>("");
     const [email, setEmail] = useState<string>("");
@@ -17,16 +20,7 @@ export default function LoginForm() {
         setPassword("");
     }
 
-    /**
-     * Switches between the signup and login forms in one click.
-     *
-     * @description
-     *      1. Toggles the boolean state `isRegistered` :
-     *          - `false` = signup form
-     *          - `true`  = login form
-     *      2. Resets all the form fields.
-     */
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSwitchingForm = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
 
         setIsRegistered(!isRegistered);
@@ -38,63 +32,82 @@ export default function LoginForm() {
 
         setErrorMessage("");
 
-        if (!isRegistered) {
-            try {
+        try {
+            if (!isRegistered) {
                 await signUp(firstname, email, password);
                 alert(`Bonjour ${firstname} !`);
-                resetFieldState();
-            } catch (e: unknown) {
-                if (e instanceof Error) {
-                    setErrorMessage(e.message);
-                }
+            } else {
+                await signIn(email, password);
+                alert("Connecté(e) !");
             }
-        } else {
-            alert("Connecté(e) !");
+
             resetFieldState();
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                setErrorMessage(e.message);
+            }
         }
+    }
+
+    const handleLogout = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+
+        signOut();
+        setIsRegistered(false);
+        console.log("Déconnecté(e) !");
     }
 
     return (
         <div>
-            <h2>{ isRegistered ? ("Déjà inscrit(e) ?") : ("Pas encore de compte ?") }</h2>
-            <form onSubmit={handleSubmit}>
-                { !isRegistered && (
-                    <>
+            { !user ? (
+                <div>
+                    <h2>{ isRegistered ? ("Déjà inscrit(e) ?") : ("Pas encore de compte ?") }</h2>
+                    <form onSubmit={handleSubmit}>
+                        { !isRegistered && (
+                            <>
+                                <div>
+                                    <label>Prénom</label>
+                                    <br />
+                                    <input type="text" placeholder="Marie" required 
+                                        value={firstname}
+                                        onChange={(e) => setFirstname(e.target.value)} />
+                                </div>
+                                <br />
+                            </>
+                        ) }
                         <div>
-                            <label>Prénom</label>
+                            <label>Adresse mail</label>
                             <br />
-                            <input type="text" placeholder="Marie" required 
-                                value={firstname}
-                                onChange={(e) => setFirstname(e.target.value)} />
+                            <input type="email" placeholder="marie@mail.com" required 
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)} />
                         </div>
                         <br />
-                    </>
-                ) }
-                <div>
-                    <label>Adresse mail</label>
+                        <div>
+                            <label>Mot de passe</label>
+                            <br />
+                            <input type="password" placeholder="*********" required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)} />
+                        </div>
+                        <br />
+                        <div>
+                            <button>{ !isRegistered ? ("S'inscrire") : ("Accéder à votre espace") }</button>
+                        </div>
+                        { errorMessage && (<p>{errorMessage}</p>) }
+                    </form>
                     <br />
-                    <input type="email" placeholder="marie@mail.com" required 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)} />
+                    <button onClick={handleSwitchingForm}>
+                        { isRegistered ? ("Pas encore de compte ? Créez-le.") : ("Déjà inscrit(e) ? Authentifiez-vous.") }
+                    </button>
                 </div>
-                <br />
+            ) : (
                 <div>
-                    <label>Mot de passe</label>
+                    <h2>Utilisateur déjà connecté : {user.email}</h2>
                     <br />
-                    <input type="password" placeholder="*********" required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)} />
+                    <button onClick={handleLogout}>Se déconnecter</button>
                 </div>
-                <br />
-                <div>
-                    <button>{ !isRegistered ? ("S'inscrire") : ("Accéder à votre espace") }</button>
-                </div>
-                { errorMessage && (<p>{errorMessage}</p>) }
-            </form>
-            <br />
-            <button onClick={handleClick}>
-                { isRegistered ? ("Pas encore de compte ? Créez-le.") : ("Déjà inscrit(e) ? Authentifiez-vous.") }
-            </button>
+            ) }
         </div>
     )
 }
