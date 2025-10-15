@@ -1,10 +1,9 @@
 import { useState, type FormEvent } from "react";
-import { signOut, signUp } from "../../../services/auth.service";
+import { signIn, signOut, signUp } from "../../../services/auth.service";
 import { useAuth } from "../../../context/useAuth";
 
 export default function LoginForm() {
-    // Current logged user
-    const { user } = useAuth();
+    const { user } = useAuth(); // Current logged user
 
     const [isRegistered, setIsRegistered] = useState<boolean>(false);
     const [firstname, setFirstname] = useState<string>("");
@@ -21,16 +20,7 @@ export default function LoginForm() {
         setPassword("");
     }
 
-    /**
-     * Switches between the signup and login forms in one click.
-     *
-     * @description
-     *      1. Toggles the boolean state `isRegistered` :
-     *          - `false` = signup form
-     *          - `true`  = login form
-     *      2. Resets all the form fields.
-     */
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSwitchingForm = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
 
         setIsRegistered(!isRegistered);
@@ -42,20 +32,29 @@ export default function LoginForm() {
 
         setErrorMessage("");
 
-        if (!isRegistered) {
-            try {
+        try {
+            if (!isRegistered) {
                 await signUp(firstname, email, password);
                 alert(`Bonjour ${firstname} !`);
-                resetFieldState();
-            } catch (e: unknown) {
-                if (e instanceof Error) {
-                    setErrorMessage(e.message);
-                }
+            } else {
+                await signIn(email, password);
+                alert("Connecté(e) !");
             }
-        } else {
-            alert("Connecté(e) !");
+
             resetFieldState();
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                setErrorMessage(e.message);
+            }
         }
+    }
+
+    const handleLogout = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+
+        signOut();
+        setIsRegistered(false);
+        console.log("Déconnecté(e) !");
     }
 
     return (
@@ -98,7 +97,7 @@ export default function LoginForm() {
                         { errorMessage && (<p>{errorMessage}</p>) }
                     </form>
                     <br />
-                    <button onClick={handleClick}>
+                    <button onClick={handleSwitchingForm}>
                         { isRegistered ? ("Pas encore de compte ? Créez-le.") : ("Déjà inscrit(e) ? Authentifiez-vous.") }
                     </button>
                 </div>
@@ -106,7 +105,7 @@ export default function LoginForm() {
                 <div>
                     <h2>Utilisateur déjà connecté : {user.email}</h2>
                     <br />
-                    <button onClick={() => signOut()}>Se déconnecter</button>
+                    <button onClick={handleLogout}>Se déconnecter</button>
                 </div>
             ) }
         </div>
