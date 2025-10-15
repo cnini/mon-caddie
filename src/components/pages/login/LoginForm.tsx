@@ -1,5 +1,14 @@
 import { useState, type FormEvent } from "react";
 import { supabase } from "../../../supabaseClient";
+import type { Session, User } from "@supabase/supabase-js";
+
+type AuthData = {
+    session: Session | null,
+    user: User | null
+} | {
+    session: null,
+    user: null
+};
 
 export default function LoginForm() {
     const [isRegistered, setIsRegistered] = useState<boolean>(false);
@@ -17,7 +26,17 @@ export default function LoginForm() {
         setPassword("");
     }
 
-    const signUp = async (userFisrtname: string, userEmail: string, userPassword: string) => {
+    /**
+     * Creates a new user in Supabase with a firstname, an email and a password.
+     * 
+     * @throws {Error} If the email is already in Supabase.
+     * @returns The created user and session data.
+     */
+    const signUp = async (
+        userFisrtname: string, 
+        userEmail: string, 
+        userPassword: string
+    ): Promise<AuthData> => {
         const { data, error } = await supabase.auth.signUp({
             email: userEmail,
             password: userPassword,
@@ -33,15 +52,25 @@ export default function LoginForm() {
         return data;
     }
 
+    /**
+     * Switches between the signup and login forms in one click.
+     *
+     * @description
+     *      1. Toggles the boolean state `isRegistered` :
+     *          - `false` = signup form
+     *          - `true`  = login form
+     *      2. Resets all the form fields.
+     */
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        setIsRegistered(!isRegistered);
 
+        setIsRegistered(!isRegistered);
         resetFieldState();
     }
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault(); 
+
         setErrorMessage("");
 
         if (!isRegistered) {
