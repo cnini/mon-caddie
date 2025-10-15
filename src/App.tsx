@@ -1,3 +1,4 @@
+import { Routes, Route } from "react-router";
 import Login from "./components/pages/login/Login";
 import { AuthProvider } from "./context/AuthContext";
 // import './App.css'
@@ -5,7 +6,9 @@ import { AuthProvider } from "./context/AuthContext";
 function App() {
     return (
         <AuthProvider>
-            <Login />
+            <Routes>
+                <Route path="/auth" element={<Login />} />
+            </Routes>
         </AuthProvider>
     )
 }
