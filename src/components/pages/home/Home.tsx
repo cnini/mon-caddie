@@ -13,6 +13,17 @@ export default function Home() {
     }, [user, navigate]);
 
     return (
-        <div>Home</div>
+        <div>
+            <h1>Bonjour {user?.user_metadata.first_name} !</h1>
+            <br />
+            <form>
+                <input type="text" placeholder="Lait" required />
+                <button>Ajouter</button>
+            </form>
+            <br />
+            <section>
+                {/* TODO : lister les produits ajoutés */}
+            </section>
+        </div>
     )
 }
