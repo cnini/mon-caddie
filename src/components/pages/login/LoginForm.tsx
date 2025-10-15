@@ -1,10 +1,12 @@
 import { useState, type FormEvent } from "react";
+import { supabase } from "../../../supabaseClient";
 
 export default function LoginForm() {
     const [isRegistered, setIsRegistered] = useState<boolean>(false);
     const [firstname, setFirstname] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
 
     const resetFieldState = () => {
         if (!isRegistered) {
@@ -15,6 +17,22 @@ export default function LoginForm() {
         setPassword("");
     }
 
+    const signUp = async (userFisrtname: string, userEmail: string, userPassword: string) => {
+        const { data, error } = await supabase.auth.signUp({
+            email: userEmail,
+            password: userPassword,
+            options: {
+                data: { first_name: userFisrtname }
+            }
+        });
+
+        if (error) {
+            throw new Error(error?.message);
+        }
+
+        return data;
+    }
+
     const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         setIsRegistered(!isRegistered);
@@ -22,16 +40,24 @@ export default function LoginForm() {
         resetFieldState();
     }
 
-    const handleSubmit = (event: FormEvent) => {
+    const handleSubmit = async (event: FormEvent) => {
         event.preventDefault(); 
+        setErrorMessage("");
 
         if (!isRegistered) {
-            alert(`Bonjour ${firstname} !`);
+            try {
+                await signUp(firstname, email, password);
+                alert(`Bonjour ${firstname} !`);
+                resetFieldState();
+            } catch (e: unknown) {
+                if (e instanceof Error) {
+                    setErrorMessage(e.message);
+                }
+            }
         } else {
             alert("Connecté(e) !");
+            resetFieldState();
         }
-
-        resetFieldState();
     }
 
     return (
@@ -69,6 +95,7 @@ export default function LoginForm() {
                 <div>
                     <button>{ !isRegistered ? ("S'inscrire") : ("Accéder à votre espace") }</button>
                 </div>
+                { errorMessage && (<p>{errorMessage}</p>) }
             </form>
             <br />
             <button onClick={handleClick}>
