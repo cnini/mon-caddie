@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router";
 import { useAuth } from "../../../context/useAuth";
 import { useEffect } from "react";
+import ListProduct from "../../ui/ListProduct";
 
 export default function Home() {
     // Routing must-have
@@ -22,7 +23,7 @@ export default function Home() {
             </form>
             <br />
             <section>
-                {/* TODO : lister les produits ajoutés */}
+                <ListProduct />
             </section>
         </div>
     )
