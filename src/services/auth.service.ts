@@ -18,7 +18,7 @@ type AuthData = {
  * @returns The created user and session data.
  */
 export const signUp = async (
-    fisrtname: string, 
+    firstname: string, 
     email: string, 
     password: string
 ): Promise<AuthData> => {
@@ -26,7 +26,7 @@ export const signUp = async (
         email: email,
         password: password,
         options: {
-            data: { first_name: fisrtname }
+            data: { first_name: firstname }
         }
     });
 
