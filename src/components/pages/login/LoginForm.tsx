@@ -1,10 +1,15 @@
 import { useState, type FormEvent } from "react";
+import { signIn, signOut, signUp } from "../../../services/auth.service";
+import { useAuth } from "../../../context/useAuth";
 
 export default function LoginForm() {
+    const { user } = useAuth(); // Current logged user
+
     const [isRegistered, setIsRegistered] = useState<boolean>(false);
     const [firstname, setFirstname] = useState<string>("");
     const [email, setEmail] = useState<string>("");
     const [password, setPassword] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
 
     const resetFieldState = () => {
         if (!isRegistered) {
@@ -15,65 +20,94 @@ export default function LoginForm() {
         setPassword("");
     }
 
-    const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const handleSwitchingForm = (event: React.MouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        setIsRegistered(!isRegistered);
 
+        setIsRegistered(!isRegistered);
         resetFieldState();
     }
 
-    const handleSubmit = (event: FormEvent) => {
+    const handleSubmit = async (event: FormEvent) => {
         event.preventDefault(); 
 
-        if (!isRegistered) {
-            alert(`Bonjour ${firstname} !`);
-        } else {
-            alert("Connecté(e) !");
-        }
+        setErrorMessage("");
 
-        resetFieldState();
+        try {
+            if (!isRegistered) {
+                await signUp(firstname, email, password);
+                alert(`Bonjour ${firstname} !`);
+            } else {
+                await signIn(email, password);
+                alert("Connecté(e) !");
+            }
+
+            resetFieldState();
+        } catch (e: unknown) {
+            if (e instanceof Error) {
+                setErrorMessage(e.message);
+            }
+        }
+    }
+
+    const handleLogout = (event: React.MouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+
+        signOut();
+        setIsRegistered(false);
+        console.log("Déconnecté(e) !");
     }
 
     return (
         <div>
-            <h2>{ isRegistered ? ("Déjà inscrit(e) ?") : ("Pas encore de compte ?") }</h2>
-            <form onSubmit={handleSubmit}>
-                { !isRegistered && (
-                    <>
+            { !user ? (
+                <div>
+                    <h2>{ isRegistered ? ("Déjà inscrit(e) ?") : ("Pas encore de compte ?") }</h2>
+                    <form onSubmit={handleSubmit}>
+                        { !isRegistered && (
+                            <>
+                                <div>
+                                    <label>Prénom</label>
+                                    <br />
+                                    <input type="text" placeholder="Marie" required 
+                                        value={firstname}
+                                        onChange={(e) => setFirstname(e.target.value)} />
+                                </div>
+                                <br />
+                            </>
+                        ) }
                         <div>
-                            <label>Prénom</label>
+                            <label>Adresse mail</label>
                             <br />
-                            <input type="text" placeholder="Marie" required 
-                                value={firstname}
-                                onChange={(e) => setFirstname(e.target.value)} />
+                            <input type="email" placeholder="marie@mail.com" required 
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)} />
                         </div>
                         <br />
-                    </>
-                ) }
-                <div>
-                    <label>Adresse mail</label>
+                        <div>
+                            <label>Mot de passe</label>
+                            <br />
+                            <input type="password" placeholder="*********" required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)} />
+                        </div>
+                        <br />
+                        <div>
+                            <button>{ !isRegistered ? ("S'inscrire") : ("Accéder à votre espace") }</button>
+                        </div>
+                        { errorMessage && (<p>{errorMessage}</p>) }
+                    </form>
                     <br />
-                    <input type="email" placeholder="marie@mail.com" required 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)} />
+                    <button onClick={handleSwitchingForm}>
+                        { isRegistered ? ("Pas encore de compte ? Créez-le.") : ("Déjà inscrit(e) ? Authentifiez-vous.") }
+                    </button>
                 </div>
-                <br />
+            ) : (
                 <div>
-                    <label>Mot de passe</label>
+                    <h2>Utilisateur déjà connecté : {user.email}</h2>
                     <br />
-                    <input type="password" placeholder="*********" required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)} />
+                    <button onClick={handleLogout}>Se déconnecter</button>
                 </div>
-                <br />
-                <div>
-                    <button>{ !isRegistered ? ("S'inscrire") : ("Accéder à votre espace") }</button>
-                </div>
-            </form>
-            <br />
-            <button onClick={handleClick}>
-                { isRegistered ? ("Pas encore de compte ? Créez-le.") : ("Déjà inscrit(e) ? Authentifiez-vous.") }
-            </button>
+            ) }
         </div>
     )
 }
