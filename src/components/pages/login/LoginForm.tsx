@@ -1,7 +1,11 @@
 import { useState, type FormEvent } from "react";
-import { signUp } from "../../../services/auth.service";
+import { signOut, signUp } from "../../../services/auth.service";
+import { useAuth } from "../../../context/useAuth";
 
 export default function LoginForm() {
+    // Current logged user
+    const { user } = useAuth();
+
     const [isRegistered, setIsRegistered] = useState<boolean>(false);
     const [firstname, setFirstname] = useState<string>("");
     const [email, setEmail] = useState<string>("");
@@ -56,45 +60,55 @@ export default function LoginForm() {
 
     return (
         <div>
-            <h2>{ isRegistered ? ("Déjà inscrit(e) ?") : ("Pas encore de compte ?") }</h2>
-            <form onSubmit={handleSubmit}>
-                { !isRegistered && (
-                    <>
+            { !user ? (
+                <div>
+                    <h2>{ isRegistered ? ("Déjà inscrit(e) ?") : ("Pas encore de compte ?") }</h2>
+                    <form onSubmit={handleSubmit}>
+                        { !isRegistered && (
+                            <>
+                                <div>
+                                    <label>Prénom</label>
+                                    <br />
+                                    <input type="text" placeholder="Marie" required 
+                                        value={firstname}
+                                        onChange={(e) => setFirstname(e.target.value)} />
+                                </div>
+                                <br />
+                            </>
+                        ) }
                         <div>
-                            <label>Prénom</label>
+                            <label>Adresse mail</label>
                             <br />
-                            <input type="text" placeholder="Marie" required 
-                                value={firstname}
-                                onChange={(e) => setFirstname(e.target.value)} />
+                            <input type="email" placeholder="marie@mail.com" required 
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)} />
                         </div>
                         <br />
-                    </>
-                ) }
-                <div>
-                    <label>Adresse mail</label>
+                        <div>
+                            <label>Mot de passe</label>
+                            <br />
+                            <input type="password" placeholder="*********" required
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)} />
+                        </div>
+                        <br />
+                        <div>
+                            <button>{ !isRegistered ? ("S'inscrire") : ("Accéder à votre espace") }</button>
+                        </div>
+                        { errorMessage && (<p>{errorMessage}</p>) }
+                    </form>
                     <br />
-                    <input type="email" placeholder="marie@mail.com" required 
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)} />
+                    <button onClick={handleClick}>
+                        { isRegistered ? ("Pas encore de compte ? Créez-le.") : ("Déjà inscrit(e) ? Authentifiez-vous.") }
+                    </button>
                 </div>
-                <br />
+            ) : (
                 <div>
-                    <label>Mot de passe</label>
+                    <h2>Utilisateur déjà connecté : {user.email}</h2>
                     <br />
-                    <input type="password" placeholder="*********" required
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)} />
+                    <button onClick={() => signOut()}>Se déconnecter</button>
                 </div>
-                <br />
-                <div>
-                    <button>{ !isRegistered ? ("S'inscrire") : ("Accéder à votre espace") }</button>
-                </div>
-                { errorMessage && (<p>{errorMessage}</p>) }
-            </form>
-            <br />
-            <button onClick={handleClick}>
-                { isRegistered ? ("Pas encore de compte ? Créez-le.") : ("Déjà inscrit(e) ? Authentifiez-vous.") }
-            </button>
+            ) }
         </div>
     )
 }

@@ -2,11 +2,11 @@ import { supabase } from "../supabaseClient";
 import type { Session, User } from "@supabase/supabase-js";
 
 type AuthData = {
-    session: Session | null,
-    user: User | null
+    session: Session | null;
+    user: User | null;
 } | {
-    session: null,
-    user: null
+    session: null;
+    user: null;
 };
 
 /**
@@ -33,4 +33,17 @@ export const signUp = async (
     }
 
     return data;
+}
+
+/**
+ * Signs out the current user.
+ * 
+ * @throws {Error} 
+ */
+export const signOut = async (): Promise<void> => {
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+        throw new Error(error?.message);
+    }
 }
