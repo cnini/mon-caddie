@@ -1,0 +1,18 @@
+import { useNavigate } from "react-router";
+import { useAuth } from "../../../context/useAuth";
+import { useEffect } from "react";
+
+export default function Home() {
+    // Routing must-have
+    const { user } = useAuth(); // Current user
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        // Redirects the current and non logged in user to the login form.
+        if (!user) navigate("/auth?form=login");
+    }, [user, navigate]);
+
+    return (
+        <div>Home</div>
+    )
+}
