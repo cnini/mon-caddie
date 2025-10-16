@@ -17,7 +17,6 @@ export default function ProductButtons({ listProduct }: ProductButtonsProps) {
 
     return (
         <div>
-            <button>Modifier</button>
             <button onClick={handleIncrease}>Ajouter</button>
             <button onClick={handleDecrease}>Retirer</button>
         </div>
