@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import ListProduct from "../../ui/ListProduct";
 import { createList, getListByUser, type List } from "../../../services/list.service";
 import { createProduct, getProductByName, type Product } from "../../../services/product.service";
-import { createListProduct, getListProductsByListAndProduct, type ListProduct as ListProductData } from "../../../services/list_product.service";
+import { createListProduct, getListProductsByListAndProduct, increaseProductQuantity, type ListProduct as ListProductData } from "../../../services/list_product.service";
 
 export default function Home() {
     // Routing must-have
@@ -60,11 +60,13 @@ export default function Home() {
 
             if (openedList && product) {
                 // Fetches the existing list product
-                const lp: ListProductData = (await getListProductsByListAndProduct(openedList, product))[0];
+                const listProduct: ListProductData = (await getListProductsByListAndProduct(openedList, product))[0];
 
                 // If does not exist, creates a new list_product
-                if (!lp) {
+                if (!listProduct) {
                     await createListProduct(openedList, product);
+                } else {
+                    await increaseProductQuantity(listProduct);
                 }
             }
 

@@ -10,6 +10,7 @@ type ProductProps = {
 export default function ProductItem({ listProduct }: ProductProps) {
     // useState variables
     const [product, setProduct] = useState<Product|null>(null);
+    const [quantity, setQuantity] = useState<number>(1);
 
     useEffect(() => {
         if (!listProduct) return;
@@ -17,6 +18,7 @@ export default function ProductItem({ listProduct }: ProductProps) {
         const getProduct = async () => {
             try {
                 setProduct((await getProductById(listProduct.product_id))[0]);
+                setQuantity(listProduct.quantity);
             } catch (e: unknown) {
                 if (e instanceof Error) {
                     console.error(e.message);
@@ -29,6 +31,6 @@ export default function ProductItem({ listProduct }: ProductProps) {
 
 
     return (
-        <li>{listProduct?.quantity}x {product?.name}</li>
+        <li>{quantity}x {product?.name}</li>
     )
 }

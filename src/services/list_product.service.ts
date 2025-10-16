@@ -70,3 +70,17 @@ export const getListProductsByListAndProduct = async (
 
     return data;
 }
+
+export const increaseProductQuantity = async (
+    listProduct: ListProduct
+): Promise<void> => {
+    const { error } = await supabase
+        .from("list_products")
+        .update({ 
+            quantity: listProduct.quantity + 1,
+            updated_at: new Date().toISOString()
+         })
+        .eq("id", listProduct.id);
+
+    if (error) throw new Error(error.message);
+}
