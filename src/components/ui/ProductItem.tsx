@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ListProduct } from "../../services/list_product.service";
 import { getProductById, type Product } from "../../services/product.service";
+import ProductButtons from "./ProductButtons";
 
 type ProductProps = {
     key: number;
@@ -31,6 +32,11 @@ export default function ProductItem({ listProduct }: ProductProps) {
 
 
     return (
-        <li>{quantity}x {product?.name}</li>
+        <li>
+            <div>
+                {quantity}x {product?.name} {<ProductButtons listProduct={listProduct} />}
+            </div>
+            <br />
+        </li>
     )
 }

@@ -43,7 +43,8 @@ export const getListProductsByList = async (
         .from("list_products")
         .select("*, lists(id, is_closed)")
         .eq("list_id", list.id)
-        .eq("lists.is_closed", false);
+        .eq("lists.is_closed", false)
+        .order("quantity", { ascending: false });
 
     if (error) throw new Error("ListProducts cannot be fetched.");
 
@@ -83,4 +84,31 @@ export const increaseProductQuantity = async (
         .eq("id", listProduct.id);
 
     if (error) throw new Error(error.message);
+}
+
+export const decreaseProductQuantity = async (
+    listProduct: ListProduct
+): Promise<void> => {
+    const newQuantity: number = listProduct.quantity - 1;
+
+    // If the new quantity is equal or lesser than 0, deletes the listProduct by its id.
+    // Otherwise, decreases the quantity.
+    if (newQuantity > 0) {
+        const { error } = await supabase
+            .from("list_products")
+            .update({ 
+                quantity: newQuantity,
+                updated_at: new Date().toISOString()
+            })
+            .eq("id", listProduct.id);
+
+        if (error) throw new Error(error.message);
+    } else {
+        const { error } = await supabase
+            .from("list_products")
+            .delete()
+            .eq("id", listProduct.id);
+
+        if (error) throw new Error(error.message);
+    }
 }
