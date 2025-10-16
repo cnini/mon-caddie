@@ -47,8 +47,6 @@ export default function Home() {
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
-        alert("handleSubmit");
-
         setErrorMessage("");
 
         if (!user) throw new Error("Not connected");

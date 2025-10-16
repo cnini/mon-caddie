@@ -72,6 +72,11 @@ export const getListProductsByListAndProduct = async (
     return data;
 }
 
+/**
+ * Increases the product's quantity.
+ * 
+ * @throws {Error}
+ */
 export const increaseProductQuantity = async (
     listProduct: ListProduct
 ): Promise<void> => {
@@ -86,13 +91,21 @@ export const increaseProductQuantity = async (
     if (error) throw new Error(error.message);
 }
 
+/**
+ * Decreases the product's quantity.
+ * 
+ * @throws {Error}
+ * 
+ * @description
+ *      If the new quantity is equal or lesser than 0, 
+ *      its deletes the listProduct by its id. Otherwise,
+ *      its decreases the product's quantity.
+ */
 export const decreaseProductQuantity = async (
     listProduct: ListProduct
 ): Promise<void> => {
     const newQuantity: number = listProduct.quantity - 1;
-
-    // If the new quantity is equal or lesser than 0, deletes the listProduct by its id.
-    // Otherwise, decreases the quantity.
+    
     if (newQuantity > 0) {
         const { error } = await supabase
             .from("list_products")
