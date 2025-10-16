@@ -1,10 +1,16 @@
 import { useNavigate } from "react-router";
 import { useAuth } from "../../../context/useAuth";
 import { useEffect, useState, type FormEvent } from "react";
-import ListProduct from "../../ui/ListProduct";
 import { createList, getListByUser, type List } from "../../../services/list.service";
 import { createProduct, getProductByName, type Product } from "../../../services/product.service";
-import { createListProduct, getListProductsByListAndProduct, increaseProductQuantity, type ListProduct as ListProductData } from "../../../services/list_product.service";
+import { 
+    createListProduct, 
+    getListProductsByListAndProduct, 
+    increaseProductQuantity, 
+    type ListProduct as ListProductData 
+} from "../../../services/list_product.service";
+
+import ListProduct from "../../ui/ListProduct";
 
 export default function Home() {
     // Routing must-have
@@ -14,7 +20,6 @@ export default function Home() {
     // useState variables
     const [productName, setProductName] = useState<string>("");
     const [openedList, setOpenedList] = useState<List|null>(null);
-
     const [errorMessage, setErrorMessage] = useState<string>("");
 
     useEffect(() => {

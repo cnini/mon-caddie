@@ -44,7 +44,7 @@ export const getListProductsByList = async (
         .select("*, lists(id, is_closed)")
         .eq("list_id", list.id)
         .eq("lists.is_closed", false)
-        .order("quantity", { ascending: false });
+        .order("id", { ascending: true });
 
     if (error) throw new Error("ListProducts cannot be fetched.");
 
@@ -105,7 +105,7 @@ export const decreaseProductQuantity = async (
     listProduct: ListProduct
 ): Promise<void> => {
     const newQuantity: number = listProduct.quantity - 1;
-    
+
     if (newQuantity > 0) {
         const { error } = await supabase
             .from("list_products")
