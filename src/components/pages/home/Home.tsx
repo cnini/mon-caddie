@@ -25,12 +25,10 @@ export default function Home() {
     useEffect(() => {
         // Redirects the current and non logged in user to the login form.
         if (!user) navigate("/auth?form=login");
-    }, [user, navigate]);
 
-    useEffect(() => {
-        if (!user) return;
- 
         const userOpenedList = async () => {
+            if (!user) return; 
+            
             try {
                 const userList: List = (await getListByUser(user, "opened"))[0];
 
@@ -48,7 +46,7 @@ export default function Home() {
         }
 
         userOpenedList();
-    }, [user]);
+    }, [user, navigate]);
 
     const handleSubmit = async (event: FormEvent) => {
         event.preventDefault();
